@@ -1,115 +1,67 @@
+"use client";
+
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
-  const [genre, setGenre] = useState('');
+  const [genreId, setGenreId] = useState('');
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  async function getRecommendations() {
-    if (!genre.trim()) {
-      alert('Lütfen bir tür (genre) girin!');
-      return;
-    }
+  const handleRecommend = async () => {
+    if (!genreId) return alert("Lütfen bir tür seçin!");
 
     setLoading(true);
+    setMovies([]);
 
     try {
-      const response = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ genre }),
-      });
-
-      const data = await response.json();
-      setMovies(data.movies || []);
+      const response = await axios.post('/api/recommend', { genreId });
+      setMovies(response.data.movies);
     } catch (error) {
-      console.error('Hata oluştu:', error);
-      alert('Bir hata oluştu. Konsolu kontrol edin.');
+      console.error('Error fetching recommendations:', error);
+      alert('Film önerileri alınamadı.');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>🎬 Film Önerici</h1>
+    <main className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+      <h1 className="text-3xl font-bold mb-6">Film Önerici 🎬</h1>
 
-      <div style={styles.inputContainer}>
-        <input
-          type="text"
-          placeholder="Tür girin (ör: aksiyon, komedi)"
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          style={styles.input}
-        />
-        <button
-          onClick={getRecommendations}
-          style={styles.button}
-        >
-          {loading ? 'Yükleniyor...' : 'Öneri Al'}
-        </button>
-      </div>
+      {/* Tür Seçimi */}
+      <select
+        className="p-2 mb-4 border rounded w-64"
+        value={genreId}
+        onChange={(e) => setGenreId(e.target.value)}
+      >
+        <option value="">Tür seçin</option>
+        <option value="28">Action</option>
+        <option value="35">Comedy</option>
+        <option value="18">Drama</option>
+        <option value="27">Horror</option>
+      </select>
 
-      <div style={styles.cardGrid}>
+      {/* Öneri Al Butonu */}
+      <button
+        onClick={handleRecommend}
+        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        {loading ? "Yükleniyor..." : "Öneri Al"}
+      </button>
+
+      {/* Film Kartları */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
         {movies.map((movie, index) => (
-          <div key={index} style={styles.card}>
-            <h3 style={styles.cardTitle}>{movie}</h3>
+          <div key={index} className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <img src={movie.poster} alt={movie.title} className="w-full h-72 object-cover" />
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-2">{movie.title}</h2>
+              <p className="text-gray-600 text-sm">{movie.overview}</p>
+            </div>
           </div>
         ))}
       </div>
-    </div>
+    </main>
   );
 }
-
-const styles = {
-  container: {
-    padding: '2rem',
-    fontFamily: 'Arial, sans-serif',
-    minHeight: '100vh',
-    backgroundColor: '#f0f2f5'
-  },
-  title: {
-    fontSize: '2.5rem',
-    textAlign: 'center',
-    marginBottom: '2rem'
-  },
-  inputContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '2rem'
-  },
-  input: {
-    padding: '0.5rem',
-    width: '250px',
-    border: '1px solid #ccc',
-    borderRadius: '8px'
-  },
-  button: {
-    marginLeft: '1rem',
-    padding: '0.5rem 1rem',
-    backgroundColor: '#0070f3',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer'
-  },
-  cardGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '1.5rem',
-    marginTop: '2rem'
-  },
-  card: {
-    backgroundColor: 'white',
-    padding: '1rem',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center',
-    transition: 'transform 0.2s',
-    cursor: 'pointer',
-  },
-  cardTitle: {
-    fontSize: '1.2rem',
-    fontWeight: 'bold'
-  }
-};
