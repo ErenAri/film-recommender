@@ -1,67 +1,72 @@
-"use client";
-
+// pages/index.js
+'use client';
 import { useState } from 'react';
-import axios from 'axios';
+import { motion } from 'framer-motion';
 
 export default function Home() {
-  const [genreId, setGenreId] = useState('');
+  const [genre, setGenre] = useState('');
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleRecommend = async () => {
-    if (!genreId) return alert("Lütfen bir tür seçin!");
-
     setLoading(true);
-    setMovies([]);
-
     try {
-      const response = await axios.post('/api/recommend', { genreId });
-      setMovies(response.data.movies);
+      const response = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genre }),
+      });
+      const data = await response.json();
+      setMovies(data.movies);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      alert('Film önerileri alınamadı.');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Film Önerici 🎬</h1>
-
-      {/* Tür Seçimi */}
-      <select
-        className="p-2 mb-4 border rounded w-64"
-        value={genreId}
-        onChange={(e) => setGenreId(e.target.value)}
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex flex-col items-center justify-center p-8">
+      <motion.h1
+        className="text-4xl font-bold text-white mb-8"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
       >
-        <option value="">Tür seçin</option>
-        <option value="28">Action</option>
-        <option value="35">Comedy</option>
-        <option value="18">Drama</option>
-        <option value="27">Horror</option>
-      </select>
+        🎬 Film Önerici
+      </motion.h1>
 
-      {/* Öneri Al Butonu */}
-      <button
-        onClick={handleRecommend}
-        className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        {loading ? "Yükleniyor..." : "Öneri Al"}
-      </button>
+      <div className="flex gap-4 mb-8">
+        <input
+          type="text"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          placeholder="Tür gir (örnek: Action)"
+          className="p-3 rounded-lg w-64 outline-none"
+        />
+        <button
+          onClick={handleRecommend}
+          className="p-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100"
+        >
+          {loading ? 'Yükleniyor...' : 'Öneri Al'}
+        </button>
+      </div>
 
-      {/* Film Kartları */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {movies.map((movie, index) => (
-          <div key={index} className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <motion.div
+            key={index}
+            className="bg-white rounded-lg shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
             <img src={movie.poster} alt={movie.title} className="w-full h-72 object-cover" />
             <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{movie.title}</h2>
-              <p className="text-gray-600 text-sm">{movie.overview}</p>
+              <h2 className="text-lg font-bold">{movie.title}</h2>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </main>
+    </div>
   );
 }
