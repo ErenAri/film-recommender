@@ -1,7 +1,8 @@
-// pages/index.js
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import '../styles/globals.css';
+
 
 export default function Home() {
   const [genre, setGenre] = useState('');
@@ -25,9 +26,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex flex-col items-center p-8">
       <motion.h1
-        className="text-4xl font-bold text-white mb-8"
+        className="text-5xl font-extrabold text-white mb-8"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -41,7 +42,7 @@ export default function Home() {
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
           placeholder="Tür gir (örnek: Action)"
-          className="p-3 rounded-lg w-64 outline-none"
+          className="p-3 rounded-lg w-64 outline-none text-gray-800"
         />
         <button
           onClick={handleRecommend}
@@ -51,18 +52,18 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">
         {movies.map((movie, index) => (
           <motion.div
             key={index}
-            className="bg-white rounded-lg shadow-lg overflow-hidden"
+            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:scale-105 transform transition duration-300"
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <img src={movie.poster} alt={movie.title} className="w-full h-72 object-cover" />
-            <div className="p-4">
-              <h2 className="text-lg font-bold">{movie.title}</h2>
+            <img src={movie.poster} alt={movie.title} className="w-full h-96 object-cover" />
+            <div className="p-4 text-center">
+              <h2 className="text-lg font-bold text-gray-800">{movie.title}</h2>
             </div>
           </motion.div>
         ))}
